@@ -47,9 +47,10 @@ inputarea.oninput = function(value) {
 
 function loadSettings() {
     var editor = ace.edit("editor");
-    $("#lang").val(sessionStorage.lang).change();
+    const lang=sessionStorage.lang||'c_cpp'
+    $("#lang").val(lang).change();
     editor.setValue(sessionStorage.code);
-    // editor.session.setMode("ace/mode/"+getLang($("#lang option:selected").val()));
+    editor.session.setMode("ace/mode/"+lang);
 }
 
 function saveSettings() {
