@@ -1,5 +1,4 @@
 var socket = io("127.0.0.1:8000");
-var editor = ace.edit("editor");
 const inputarea = document.getElementById("input");
 const outputarea = document.getElementById("output")
 var code_source = 'type';
@@ -13,20 +12,7 @@ socket.on("code-typed", function(data) {
     code_source = 'socket';
     editor.setValue(data.code);
 })
-editor.on("change", function(obj) {
-    console.log("code changed", editor.getValue());
-    if (sessionStorage.source === 'candidate') {
-        socket.emit('code-typed', { code: editor.getValue(), lang: $("#lang option:selected").val() }, function(err) {
-            if (err) {
-                alert(err);
-                window.location.href = "/";
-            } else {
-                console.log("No error");
-            }
-        })
-    }
 
-})
 socket.on("input-changed", function(data) {
     inputarea.value = data.input;
 })
@@ -47,18 +33,18 @@ inputarea.oninput = function(value) {
 
 function loadSettings() {
     var editor = ace.edit("editor");
-    let lang=sessionStorage.lang;
-    let code=sessionStorage.code;
-    if(lang===undefined)
-    	lang='c';
+    let lang = sessionStorage.lang;
+    let code = sessionStorage.code;
+    if (lang === undefined)
+        lang = 'c';
     $("#lang").val(lang).change();
-    
-    editor.session.setMode("ace/mode/"+getLang(lang));
-    if(code!==undefined){
-    	editor.setValue(code);
+
+    editor.session.setMode("ace/mode/" + getLang(lang));
+    if (code !== undefined) {
+        editor.setValue(code);
     }
-    	
-    
+
+
 }
 
 function saveSettings() {
@@ -80,6 +66,20 @@ $(document).ready(function() {
     loadSettings();
     var editor = ace.edit("editor");
     console.log(editor);
+    editor.on("change", function(obj) {
+        console.log("code changed", editor.getValue());
+        if (sessionStorage.source === 'candidate') {
+            socket.emit('code-typed', { code: editor.getValue(), lang: $("#lang option:selected").val() }, function(err) {
+                if (err) {
+                    alert(err);
+                    window.location.href = "/";
+                } else {
+                    console.log("No error");
+                }
+            })
+        }
+
+    })
     editor.setTheme("ace/theme/chrome");
     editor.session.setMode("ace/mode/" + getLang($("#lang option:selected").val()));
     jQuery('#lang').on('change', function() {
@@ -89,12 +89,12 @@ $(document).ready(function() {
         const source = $("input[name='source']:checked").val();
         const name = $("#name").val();
         const room = $("#room-id").val();
-        sessionStorage.source=source;
-        if(source==='interviewer'){
-        	editor.setReadOnly(true)
+        sessionStorage.source = source;
+        if (source === 'interviewer') {
+            editor.setReadOnly(true)
         }
         $('#welcome-modal').modal('hide');
-        socket.emit('join', { name,source,room }, function(err) {
+        socket.emit('join', { name, source, room }, function(err) {
             if (err) {
                 alert(err);
                 window.location.href = "/";
