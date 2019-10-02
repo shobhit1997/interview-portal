@@ -1,3 +1,4 @@
+require('dotenv').config();
 const socketIO = require('socket.io');
 const server = require('./server');
 var io = socketIO(server);

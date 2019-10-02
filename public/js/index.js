@@ -1,4 +1,4 @@
-var socket = io("127.0.0.1:8000");
+var socket = io();
 const inputarea = document.getElementById("input");
 const outputarea = document.getElementById("output")
 var code_source = 'type';
