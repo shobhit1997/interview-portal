@@ -13,6 +13,12 @@ socket.on("code-typed", function(data) {
     editor.setValue(data.code);
 })
 
+socket.on("lang-changed", function(data) {
+    var editor = ace.edit("editor");
+    $("#lang").val(data.lang).change();
+    editor.session.setMode("ace/mode/" + getLang($("#lang option:selected").val()));
+})
+
 socket.on("input-changed", function(data) {
     inputarea.value = data.input;
 })
@@ -84,6 +90,16 @@ $(document).ready(function() {
     editor.session.setMode("ace/mode/" + getLang($("#lang option:selected").val()));
     jQuery('#lang').on('change', function() {
         editor.session.setMode("ace/mode/" + getLang($("#lang option:selected").val()));
+        if (sessionStorage.source === 'candidate') {
+            socket.emit('lang-changed', { lang: $("#lang option:selected").val() }, function(err) {
+                if (err) {
+                    alert(err);
+                    window.location.href = "/";
+                } else {
+                    console.log("No error");
+                }
+            });
+        }
     });
     jQuery('#join-button').on('click', function(e) {
         const source = $("input[name='source']:checked").val();

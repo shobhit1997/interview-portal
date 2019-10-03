@@ -13,7 +13,9 @@ io.on('connection', client => {
         if (params.source === 'candidate' && users.getUserByRoomAndSource(params.room, params.source)) {
             callback("Single Candidate can connect to the room")
         }
-        // users.removeUser(client.id);
+        else if (params.source === 'candidate' && users.getUserList(params.room).length===0) {
+            callback("Only an interviewer can create a  room")
+        }
         else {
             users.addUser(client.id, params.name, params.room, params.source);
             io.to(params.room).emit('room-joined', users.getUserList(params.room));
@@ -30,12 +32,23 @@ io.on('connection', client => {
     });
     client.on('input-changed', function(data, callback) {
         var user = users.getUser(client.id);
-        client.broadcast.to(user.room).emit('input-changed', data);
+        if(user){
+            client.broadcast.to(user.room).emit('input-changed', data);    
+        }
+        callback();
+    });
+    client.on('lang-changed', function(data, callback) {
+        var user = users.getUser(client.id);
+        if(user){
+            client.broadcast.to(user.room).emit('lang-changed', data);    
+        }
         callback();
     });
     client.on('output-changed', function(data, callback) {
         var user = users.getUser(client.id);
-        client.broadcast.to(user.room).emit('output-changed', data);
+        if(user){
+            client.broadcast.to(user.room).emit('output-changed', data);    
+        }
         callback();
     });
     client.on('disconnect', () => {
